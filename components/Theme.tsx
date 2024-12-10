@@ -6,6 +6,8 @@ const theme = createTheme({
     //background color
     bg: "#FFFFFF",
     bg1: "#EDEDED",
+    bg2: "#E2F4FF",
+    bg3: "#BAE1FF",
 
     primary: "#008BFF",
 
@@ -17,16 +19,28 @@ const theme = createTheme({
     border3: "#DFDFDF",
 
     //text color
-    text: "#4F4F4F",
+    text: "#9C9C9C",
     text1: "#282828",
   },
   // fonts
   textVariants: {
     title1: {
-      fontSize: 26,
-      fontFamily: "Gilroy-Bold",
-      fontWeight: "700",
-      lineHeight: 35.57,
+      fontSize: 24,
+      fontFamily: "Inter-Bold",
+      fontWeight: "600",
+      lineHeight: 32,
+    },
+    text1: {
+      fontSize: 14,
+      fontFamily: "Inter-Light",
+      fontWeight: "400",
+      lineHeight: 22,
+    },
+    text2: {
+      fontSize: 20,
+      fontFamily: "Inter-Bold",
+      fontWeight: "600",
+      lineHeight: 32,
     },
 
     defaults: {

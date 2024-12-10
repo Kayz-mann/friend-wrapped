@@ -15,7 +15,9 @@ export default function useCachedResources() {
                 // Load fonts
                 await Font.loadAsync({
                     ...FontAwesome.font,
-                    'SpaceMono-Regular': require('../assets/fonts/SpaceMono-Regular.ttf')
+                    'Inter-Light': require('../assets/fonts/Inter/static/Inter_18pt-Light.ttf'),
+                    'Inter-Medium': require('../assets/fonts/Inter/static/Inter_18pt-Medium.ttf'),
+                    'Inter-Bold': require('../assets/fonts/Inter/static/Inter_18pt-Bold.ttf'),
                 });
             } catch (e) {
                 // We might want to provide this error information to an error reporting service
