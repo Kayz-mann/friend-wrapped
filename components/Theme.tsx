@@ -8,11 +8,14 @@ const theme = createTheme({
     bg1: "#EDEDED",
     bg2: "#E2F4FF",
     bg3: "#BAE1FF",
+    bg4: "#00A854",
+    bg5: "#EDEDED",
 
     primary: "#008BFF",
 
     error: "#D90000",
     black: "#000000",
+    gray: "#9C9C9C",
 
     border: "#DBDBDB",
     border1: "#003861",
@@ -30,6 +33,12 @@ const theme = createTheme({
       fontWeight: "600",
       lineHeight: 32,
     },
+    title2: {
+      fontSize: 30,
+      fontFamily: "Inter-Medium",
+      fontWeight: "500",
+      lineHeight: 40,
+    },
     text1: {
       fontSize: 14,
       fontFamily: "Inter-Light",
@@ -41,6 +50,36 @@ const theme = createTheme({
       fontFamily: "Inter-Bold",
       fontWeight: "600",
       lineHeight: 32,
+    },
+    text3: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      fontWeight: "600",
+      lineHeight: 16.94,
+    },
+    text4: {
+      fontSize: 12,
+      fontFamily: "Inter-Medium",
+      fontWeight: "500",
+      lineHeight: 16,
+    },
+    text5: {
+      fontSize: 14,
+      fontFamily: "Inter-Medium",
+      fontWeight: "500",
+      lineHeight: 18,
+    },
+    text6: {
+      fontSize: 16,
+      fontFamily: "Inter-Medium",
+      fontWeight: "500",
+      lineHeight: 18,
+    },
+    text7: {
+      fontSize: 16,
+      fontFamily: "Inter-Medium",
+      fontWeight: "600",
+      lineHeight: 19.36,
     },
 
     defaults: {

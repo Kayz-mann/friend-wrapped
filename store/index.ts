@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit'
 import { persistStore } from 'redux-persist'
 import authReducer from './auth/index'
 import globalReducer from './global/index'
+import invitedContactsReducer from './global/index'
 
 
 const store = configureStore({
   reducer: {
     global: globalReducer,
     auth: authReducer,
+    invitedContacts: invitedContactsReducer,
 
   },
   middleware: getDefaultMiddleware =>

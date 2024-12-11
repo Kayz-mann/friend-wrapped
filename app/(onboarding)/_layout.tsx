@@ -8,8 +8,10 @@ import Button from "@/components/Button";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { useAppDispatch } from "@/store/hooks";
 import { setUserProfileImage } from "@/store/global";
+import { useRouter } from "expo-router";
 
 export default function OnboardingScreen() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const [image, setImage] = useState<string | null>(null);
   const titleText = "Add a profile photo";
@@ -89,6 +91,8 @@ export default function OnboardingScreen() {
                 ? takePhoto
                 : () => {
                     dispatch(setUserProfileImage(image));
+
+                    router.push("/(stack)/invite");
                   }
             }
           />
