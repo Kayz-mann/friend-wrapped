@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   FlatList,
   Image,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
@@ -13,11 +12,19 @@ import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
+import { useForm } from "react-hook-form";
+import RNBounceable from "@freakycoder/react-native-bounceable";
 
 import { useContacts } from "@/hooks/useContacts";
 import theme, { Text } from "./Theme";
 import { useContactEngagement } from "@/hooks/useContactEngagement";
-import { getDarkerShade, getRandomLightColor } from "@/constants/constants";
+import {
+  getDarkerShade,
+  getRandomLightColor,
+  Shadows,
+} from "@/constants/constants";
+import FormInput from "./FormInput";
+import ListEmptyCompontent from "./ListEmptyCompontent";
 
 interface ContactEngagement {
   contactId: string;
@@ -32,11 +39,23 @@ interface ContactListProps {
 }
 
 const ContactList = ({ contactEngagement, onInvite }: ContactListProps) => {
+  const { control, watch } = useForm();
+  const searchQuery = watch("search");
   const { contacts, permissionStatus, isLoading, error } = useContacts();
   const [invitedContacts, setInvitedContacts] = useState<Contacts.Contact[]>(
     []
   );
+  const [loadingStates, setLoadingStates] = useState<{
+    [key: string]: boolean;
+  }>({});
+
   const sortedContacts = useContactEngagement(contacts, contactEngagement);
+
+  // Filter contacts based on the search query
+  const filteredContacts = sortedContacts.filter((contact) => {
+    const fullName = `${contact.firstName} ${contact.lastName}`;
+    return fullName.toLowerCase().includes(searchQuery?.toLowerCase() || "");
+  });
 
   const getInitials = (contact: Contacts.Contact) => {
     if (contact.firstName && contact.lastName) {
@@ -52,20 +71,38 @@ const ContactList = ({ contactEngagement, onInvite }: ContactListProps) => {
   };
 
   const handleInvite = (contact: Contacts.Contact) => {
+    const contactId = contact.id as string;
+
     if (
       invitedContacts.length < 5 &&
-      !invitedContacts.some((c) => c.id === contact.id)
+      !invitedContacts.some((c) => c.id === contactId)
     ) {
-      setInvitedContacts((prev) => [...prev, contact]);
-      if (onInvite) {
-        onInvite(contact);
-      }
+      // Set loading state to true for this contact
+      setLoadingStates((prev) => ({
+        ...prev,
+        [contactId]: true, // Set loading state to true when invitation starts
+      }));
+
+      setTimeout(() => {
+        setInvitedContacts((prev) => [...prev, contact]);
+        setLoadingStates((prev) => ({
+          ...prev,
+          [contactId]: false, // Set loading state to false after 2 seconds
+        }));
+        if (onInvite) {
+          onInvite(contact);
+        }
+      }, 2000);
     }
   };
 
   const renderContactItem = ({ item }: { item: Contacts.Contact }) => {
     const backgroundColor = getRandomLightColor();
     const textColor = getDarkerShade(backgroundColor);
+
+    const isInvited = invitedContacts.some((c) => c.id === item.id);
+
+    const loadingState = item.id ? loadingStates[item.id] : undefined;
 
     const formattedLastName =
       item.lastName && item.lastName.length > 25
@@ -89,15 +126,23 @@ const ContactList = ({ contactEngagement, onInvite }: ContactListProps) => {
         <Text variant="text6" color="text" style={styles.contactName}>
           {item.firstName || ""} {formattedLastName}
         </Text>
-        <TouchableOpacity
+
+        <RNBounceable
+          hitSlop={{ right: 10, left: 10, bottom: 10, top: 10 }}
           style={styles.inviteButton}
           onPress={() => handleInvite(item)}
         >
-          <MaterialIcons name="person-add" size={14} color="black" />
+          {loadingState ? (
+            <ActivityIndicator size={8} color="black" />
+          ) : isInvited ? (
+            <Text style={{ fontSize: 10 }}>💌</Text>
+          ) : (
+            <MaterialIcons name="person-add" size={14} color="black" />
+          )}
           <Text variant="text7" style={styles.inviteText}>
             Invite
           </Text>
-        </TouchableOpacity>
+        </RNBounceable>
       </View>
     );
   };
@@ -130,19 +175,32 @@ const ContactList = ({ contactEngagement, onInvite }: ContactListProps) => {
   }
 
   return (
-    <FlatList
-      showsVerticalScrollIndicator={false}
-      data={sortedContacts}
-      keyExtractor={(item) => item.id || ""}
-      renderItem={renderContactItem}
-      ListEmptyComponent={
-        <View style={styles.permissionContainer}>
-          <Text>No contacts found</Text>
-        </View>
-      }
-      contentContainerStyle={styles.listContainer}
-      style={styles.listStyle}
-    />
+    <View style={{ alignItems: "center" }}>
+      <FormInput
+        control={control}
+        name={"search"}
+        type={"input"}
+        height={50}
+        search
+        placeholder={"Search contacts"}
+        style={styles.formStyle}
+      />
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={filteredContacts}
+        keyExtractor={(item) => item.id || ""}
+        renderItem={renderContactItem}
+        ListEmptyComponent={
+          <ListEmptyCompontent
+            title="No contacts found"
+            description="Try adding some contacts to get started"
+          />
+        }
+        contentContainerStyle={styles.listContainer}
+        style={styles.listStyle}
+      />
+    </View>
   );
 };
 
@@ -157,7 +215,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
-    width: wp(85),
+    width: wp(87),
   },
   contactImage: {
     width: 40,
@@ -199,6 +257,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  formStyle: {
+    paddingLeft: 45,
+    borderRadius: 20,
+    backgroundColor: theme.colors.bg5,
+    height: 48,
+    width: wp(90),
+
+    ...Shadows.small,
+    borderColor: theme.colors.border,
   },
 });
 

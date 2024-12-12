@@ -1,25 +1,38 @@
-import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
-import React, { useState } from "react";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { widthPercentageToDP as wp } from "react-native-responsive-screen";
-
+import React, { useState, useEffect } from "react";
+import {
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Linking,
+} from "react-native";
+import RNBounceable from "@freakycoder/react-native-bounceable";
+import { useGoogleSignIn } from "@/hooks/useGoogleSignIn";
 import { Box, Text } from "@/components/Theme";
 import theme from "@/components/Theme";
-import FriendListHolder from "@/components/FriendListHolder";
-import FormInput from "@/components/FormInput";
-import { useForm } from "react-hook-form";
-import { Shadows } from "@/constants/constants";
-import ContactList from "@/components/ContactList";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { BlurView } from "expo-blur";
+import {
+  heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
+} from "react-native-responsive-screen";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { addInvitedContact } from "@/store/global";
+import InviteProgressButton from "@/components/InviteProgressButton";
+import Pulse from "@/components/Pulse";
+import CustomLockButton from "@/components/CustomLockButton";
+import FriendListHolder from "@/components/FriendListHolder";
+import ContactList from "@/components/ContactList";
+import { isIOS } from "@/constants/constants";
 
 const Invite = () => {
   const dispatch = useAppDispatch();
-  const { control, watch } = useForm();
-  const { invitedContacts } = useAppSelector((state) => state.global);
-  // const [invitedContacts, setInvitedContacts] = useState<any[]>([]); // State to hold invited contacts
-
+  const { signIn, signOut, user } = useGoogleSignIn();
+  const [initializing, setInitializing] = useState(true);
+  const { invitedContacts, customLockButtonIsOpen } = useAppSelector(
+    (state) => state.global
+  );
+  const { isLoggedIn } = useAppSelector((state) => state.auth);
   const titleText = "Wrapped only works\nwith friends";
 
   const placeholderData = Array(5)
@@ -29,15 +42,46 @@ const Invite = () => {
     });
 
   const handleInviteContact = (contact: any) => {
-    // Add contact to invitedContacts if there is space (maximum 5 contacts)
     if (invitedContacts.length <= 5) {
-      // setInvitedContacts((prevContacts) => [...prevContacts, contact]);
       dispatch(addInvitedContact(contact));
     }
   };
 
+  // Function to share the app link via iMessage
+  const shareAppLink = (contact: any) => {
+    if (isIOS && contact?.phoneNumber) {
+      const message =
+        "Get this app: https://get.friendwrapped.com/invite?code=ZCWQ85PV";
+      const url = `sms:${contact.phoneNumber}?body=${encodeURIComponent(
+        message
+      )}`;
+      Linking.openURL(url).catch((err) =>
+        console.error("An error occurred opening iMessage", err)
+      );
+    }
+  };
+
+  useEffect(() => {
+    setInitializing(false);
+  }, []);
+
+  if (initializing) return null;
+
   return (
     <View style={styles.container}>
+      {isLoggedIn && (
+        <RNBounceable
+          hitSlop={{ right: 10, left: 10, bottom: 10, top: 10 }}
+          style={styles.signOutButton}
+          onPress={signOut}
+        >
+          <Box style={styles.signOutFlex}>
+            <MaterialIcons name="logout" size={16} color="black" />
+            <Text style={{ fontSize: 8, fontWeight: "800" }}>Sign Out</Text>
+          </Box>
+        </RNBounceable>
+      )}
+
       <Text style={styles.title} variant="title2" color="text1">
         {titleText}
       </Text>
@@ -57,9 +101,7 @@ const Invite = () => {
                 item
                   ? {
                       contactImage: item.image?.uri,
-                      contactName: item
-                        ? `${item.firstName} ${item.lastName}`
-                        : undefined,
+                      contactName: `${item.firstName} ${item.lastName}`,
                     }
                   : undefined
               }
@@ -75,27 +117,86 @@ const Invite = () => {
         />
       </View>
 
-      <TouchableOpacity style={styles.flexText}>
+      <TouchableOpacity
+        style={styles.flexText}
+        onPress={() => {
+          if (isIOS) {
+            const infoUrl =
+              "https://apps.apple.com/gb/app/friend-wrapped/id6475646063";
+            Linking.openURL(infoUrl).catch((err) =>
+              console.error("An error occurred opening the store link", err)
+            );
+          }
+        }}
+      >
         <MaterialIcons name="info" size={16} color={theme.colors.bg4} />
         <Text ml="s" variant="text5" color="bg4">
           Why 5 friends?
         </Text>
       </TouchableOpacity>
 
+      {/* Main Content with Overlay */}
       <View style={styles.content}>
-        <FormInput
-          control={control}
-          name={"search"}
-          type={"input"}
-          height={50}
-          search
-          placeholder={"Search contacts"}
-          style={styles.formStyle}
-        />
-
         <Box mt="s">
           <ContactList onInvite={handleInviteContact} />
         </Box>
+
+        <InviteProgressButton
+          invitedContacts={invitedContacts.length}
+          onPress={() => shareAppLink(invitedContacts[0])}
+        />
+
+        {isLoggedIn && (
+          <Text
+            style={{ marginTop: hp(2), textAlign: "center" }}
+            variant="text10"
+            color="text2"
+          >
+            🎉 Invited by {user?.displayName || "unknown"}
+          </Text>
+        )}
+
+        {/* Login Overlay */}
+        {!isLoggedIn && (
+          <View style={styles.overlayContainer}>
+            <BlurView style={styles.blurOverlay} intensity={10} tint="light">
+              <View style={styles.pulseWrapper}>
+                <Pulse
+                  backgroundColor={theme.colors.bg1}
+                  dotBackgroundColor={theme.colors.bg1}
+                  icon={
+                    <CustomLockButton
+                      googleSignInAction={signIn}
+                      emailSignInAction={() => {}}
+                    />
+                  }
+                />
+              </View>
+
+              {!customLockButtonIsOpen && (
+                <Box style={{ marginTop: hp(8) }}>
+                  <Text
+                    style={styles.overlayText}
+                    variant="title1"
+                    color="text1"
+                  >
+                    Welcome to Friendly Wrapped
+                  </Text>
+
+                  <Text
+                    style={styles.overlayText}
+                    variant="text3"
+                    color="black"
+                  >
+                    {
+                      "Click the Lock Icon to Login\nand Unlock Invite Friends Features"
+                    }
+                  </Text>
+                </Box>
+              )}
+            </BlurView>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -108,7 +209,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
     backgroundColor: theme.colors.bg,
-    paddingTop: hp(10),
+    paddingTop: hp(11),
   },
   title: {
     textAlign: "center",
@@ -120,7 +221,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 70,
     backgroundColor: theme.colors.bg4,
-    marginTop: 8,
+    marginTop: hp(1),
+  },
+  content: {
+    alignItems: "center",
+    marginTop: hp(4),
+    width: wp(90),
+    position: "relative", // Important for absolute positioning of overlay
   },
   contactPlaceholder: {
     marginTop: 25,
@@ -135,21 +242,43 @@ const styles = StyleSheet.create({
   flexText: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: hp(1),
   },
-  formStyle: {
-    paddingLeft: 45,
-    borderRadius: 20,
-    backgroundColor: theme.colors.bg5,
-    height: 48,
-    width: wp(90),
-
-    ...Shadows.small,
-    borderColor: theme.colors.border,
-  },
-  content: {
+  overlayContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: hp(4),
+  },
+  blurOverlay: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pulseWrapper: {
+    position: "absolute", // Ensure it stays fixed in place
+    top: hp(8), // Adjust this value as needed for vertical alignment
+    left: wp(0), // Ensure it's aligned to the left
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlayText: {
+    textAlign: "center",
+    marginTop: hp(2),
+  },
+  signOutButton: {
     width: wp(90),
+    justifyContent: "flex-end",
+    flexDirection: "row",
+    marginTop: -hp(3),
+  },
+  signOutFlex: {
+    flexDirection: "column",
+    alignItems: "center",
   },
 });

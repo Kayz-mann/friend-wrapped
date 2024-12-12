@@ -20,10 +20,12 @@ const theme = createTheme({
     border: "#DBDBDB",
     border1: "#003861",
     border3: "#DFDFDF",
+    border4: "#0C54DA",
 
     //text color
     text: "#9C9C9C",
     text1: "#282828",
+    text2: "#737373",
   },
   // fonts
   textVariants: {
@@ -80,6 +82,24 @@ const theme = createTheme({
       fontFamily: "Inter-Medium",
       fontWeight: "600",
       lineHeight: 19.36,
+    },
+    text8: {
+      fontSize: 20,
+      fontFamily: "Inter-Bold",
+      fontWeight: "600",
+      lineHeight: 32,
+    },
+    text9: {
+      fontSize: 12,
+      fontFamily: "Inter-Bold",
+      fontWeight: "600",
+      lineHeight: 14.52,
+    },
+    text10: {
+      fontSize: 14,
+      fontFamily: "Inter-Bold",
+      fontWeight: "600",
+      lineHeight: 16.94,
     },
 
     defaults: {

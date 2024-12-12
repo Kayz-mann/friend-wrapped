@@ -4,6 +4,7 @@ import persistReducer from "redux-persist/es/persistReducer";
 
 interface AuthState {
   userInfo?: UserProfile;
+  isLoggedIn?: boolean;
 }
 
 interface UserProfile {
@@ -16,6 +17,7 @@ export interface RootState {
 
 const initialState: AuthState = {
   userInfo: undefined,
+  isLoggedIn: false
 };
 
 export const authSlice = createSlice({
@@ -27,6 +29,10 @@ export const authSlice = createSlice({
         ...state.userInfo,
         ...action.payload,
       };
+      
+    },
+    setIsLoggedIn: (state, action: PayloadAction<boolean>) => {
+      state.isLoggedIn = action.payload;
     },
     reset: (state) => {
       state.userInfo = undefined;
@@ -34,7 +40,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { setUserInfo, reset } = authSlice.actions;
+export const { setUserInfo, reset, setIsLoggedIn } = authSlice.actions;
 
 export const selectAuth = (state: RootState) => state.auth;
 

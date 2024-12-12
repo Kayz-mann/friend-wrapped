@@ -56,6 +56,7 @@ const ProfileImageHandler = ({ withDescriptions, image }: PlaceholderProps) => {
                   <ActivityIndicator
                     size="large"
                     color={theme.colors.primary}
+                    style={{ marginTop: -12 }}
                   />
                 </View>
               )}
