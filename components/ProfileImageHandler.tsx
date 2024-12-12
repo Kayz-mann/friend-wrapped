@@ -56,6 +56,7 @@ const ProfileImageHandler = ({ withDescriptions, image }: PlaceholderProps) => {
                   <ActivityIndicator
                     size="large"
                     color={theme.colors.primary}
+                    style={{ marginTop: -12 }}
                   />
                 </View>
               )}
@@ -94,7 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.7)",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 10,
+    zIndex: 90,
     borderRadius: 100,
   },
   roundedContainer: {

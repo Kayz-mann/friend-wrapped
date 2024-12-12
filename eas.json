@@ -1,0 +1,126 @@
+{
+  "cli": {
+    "version": ">= 9.0.6"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "development-simulator": {
+      "developmentClient": true,
+      "android": {
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      },
+      "ios": {
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        },
+        "cache": {
+          "disabled": true
+        },
+        "simulator": true,
+        "resourceClass": "m-medium"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "preview2": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      }
+    },
+    "preview3": {
+      "developmentClient": true
+    },
+
+    "client": {
+      "developmentClient": true,
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      },
+      "ios": {
+        "cache": {
+          "disabled": true
+        },
+        "buildConfiguration": "Release",
+        "resourceClass": "m1-medium",
+        "distribution": "internal",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      }
+    },
+
+    "internal": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      },
+      "ios": {
+        "cache": {
+          "disabled": true
+        },
+        "buildConfiguration": "Release",
+        "resourceClass": "m-medium",
+        "distribution": "internal",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      }
+    },
+    "dev": {
+      "releaseChannel": "production",
+      "android": {
+        "gradleCommand": ":app:assembleRelease",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      },
+      "ios": {
+        "cache": {
+          "disabled": true
+        },
+        "buildConfiguration": "Release",
+        "resourceClass": "m1-medium",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env"
+        }
+      }
+    },
+    "production": {
+      
+      "releaseChannel": "production",
+      "android": {
+        "gradleCommand": ":app:bundleRelease", //assembleRelease
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env.production"
+        }
+      },
+      "ios": {
+        "cache": {
+          "disabled": true
+        },
+        "buildConfiguration": "Release",
+        "resourceClass": "m1-medium",
+        "env": {
+          "DOTENV_CONFIG_PATH": ".env.production"
+        }
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
